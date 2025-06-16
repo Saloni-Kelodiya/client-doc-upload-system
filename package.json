@@ -1,0 +1,12 @@
+
+{
+  "name": "client-upload-system",
+  "scripts": {
+    "client": "cd client && npm run dev",
+    "server": "cd server && nodemon index.js",
+    "dev": "concurrently \"npm run client\" \"npm run server\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0"
+  }
+}
