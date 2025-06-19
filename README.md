@@ -93,7 +93,7 @@ Frontend: Deployed using Vercel
 
 Backend: Deployed using Render
 
-Database: Hosted on MongoDB Atlas
+Database: Hosted on MongoDB
 
 📬 Contact
 Made with ❤️ by Saloni kelodiya
