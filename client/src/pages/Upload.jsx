@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+
+
 const Upload = () => {
   const [form, setForm] = useState({ type: "", description: "", deadline: "", file: null });
   const [message, setMessage] = useState("");
@@ -101,13 +103,14 @@ const Upload = () => {
               <li key={doc._id} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg shadow-sm hover:bg-gray-100">
                 <div>
                   <a
-                    href={`http://localhost:5000/uploads/${doc.fileName}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-medium text-blue-600 hover:underline"
-                  >
-                    {doc.originalName}
-                  </a>{" "}
+  href={doc.fileUrl}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="font-medium text-blue-600 hover:underline"
+>
+  {doc.originalName}
+</a>
+{" "}
                   — <span className="text-gray-700">{doc.type}</span>
                 </div>
                 <div className="text-gray-500 text-sm">{doc.expiryDate?.slice(0, 10)}</div>

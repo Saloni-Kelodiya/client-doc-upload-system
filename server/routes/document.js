@@ -36,15 +36,23 @@ router.put("/documents/:id", authenticate, async (req, res) => {
   res.json(updated);
 });
 
-// Delete document
 router.delete("/documents/:id", authenticate, async (req, res) => {
-  const doc = await Document.findOneAndDelete({ _id: req.params.id, clientId: req.userId });
-  if (!doc) return res.status(404).json({ message: "Not found" });
+  try {
+    const doc = await Document.findById(req.params.id);
+    if (!doc) return res.status(404).json({ message: "Document not found" });
 
-  const filePath = path.join(UPLOAD_DIR, doc.fileName);
-  if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    // Delete file from uploads folder
+    const filePath = path.join(process.cwd(), "uploads", doc.fileName);
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
 
-  res.json({ message: "Deleted successfully" });
+    // Delete document from DB
+    await doc.remove();
+
+    res.status(200).json({ message: "Document deleted successfully" });
+  } catch (err) {
+    console.error("Delete error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 export default router;

@@ -1,0 +1,20 @@
+# Node modules
+node_modules/
+client/node_modules/
+
+# Environment files
+.env
+client/.env
+
+# Build folders
+client/build/
+
+# Uploads folder (optional: don’t push uploaded files)
+server/uploads/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

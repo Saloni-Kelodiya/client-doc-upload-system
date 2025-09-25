@@ -17,6 +17,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
 });
 const upload = multer({ storage });
+ 
 
 // POST /api/upload
 router.post("/", authenticate, upload.single("document"), async (req, res) => {
@@ -24,31 +25,25 @@ router.post("/", authenticate, upload.single("document"), async (req, res) => {
 
   const { type, description, expiryDate } = req.body;
   const clientId = req.userId;
- const fullUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
- try {
- 
-const newDoc = new Document({
-  clientId,
-  type,
-  description,
-  expiryDate,
-  fileName: req.file.filename,
-  fileUrl: fullUrl,          // ✅ full URL
-  originalName: req.file.originalname,
+  const fullUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+
+  try {
+    const newDoc = new Document({
+      clientId,
+      type,
+      description,
+      expiryDate,
+      fileName: req.file.filename,  // ✅ Save filename
+      fileUrl: fullUrl,             // ✅ Save full URL
+      originalName: req.file.originalname,
+    });
+
+    await newDoc.save();
+    res.status(200).json({ message: "File uploaded", document: newDoc });
+  } catch (err) {
+    console.error("Upload error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
-await newDoc.save();
 
-res.status(200).json({
-  message: "File uploaded",
-  document: newDoc,
-});
-
-
-
-} catch (err) {
-  console.error("Upload error:", err);
-  res.status(500).json({ message: "Server error" });
-}
-
-})
 export default router;
