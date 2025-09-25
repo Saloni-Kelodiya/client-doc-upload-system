@@ -1,60 +1,50 @@
 import express from "express";
 import Document from "../models/Document.js";
 import authenticate from "../middlewares/authenticate.js";
-import fs from "fs";
 import path from "path";
+import fs from "fs";
 
 const router = express.Router();
 const UPLOAD_DIR = path.join(process.cwd(), "uploads");
 
+// Get all documents for a client
 router.get("/documents", authenticate, async (req, res) => {
-  try {
-    const documents = await Document.find({ clientId: req.userId }).sort({ createdAt: -1 });
-    res.json({ documents });
-  } catch (err) {
-    console.error("Fetch error:", err);
-    res.status(500).json({ message: "Error fetching documents" });
-  }
+  const documents = await Document.find({ clientId: req.userId }).sort({ createdAt: -1 });
+  res.json({ documents });
 });
 
+// View document (inline in browser)
 router.get("/documents/:id/view", authenticate, async (req, res) => {
-  try {
-    const doc = await Document.findOne({ _id: req.params.id, clientId: req.userId });
-    if (!doc) return res.status(404).json({ message: "Not found" });
-    res.sendFile(path.join(UPLOAD_DIR, path.basename(doc.fileUrl)));
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error viewing document" });
-  }
+  const doc = await Document.findOne({ _id: req.params.id, clientId: req.userId });
+  if (!doc) return res.status(404).json({ message: "Document not found" });
+
+  const filePath = path.join(UPLOAD_DIR, doc.fileName);
+  if (!fs.existsSync(filePath)) return res.status(404).json({ message: "File missing" });
+
+  res.sendFile(filePath);
 });
 
+// Update document metadata
 router.put("/documents/:id", authenticate, async (req, res) => {
-  try {
-    const { type, description, expiryDate } = req.body;
-    const updated = await Document.findOneAndUpdate(
-      { _id: req.params.id, clientId: req.userId },
-      { type, description, expiryDate },
-      { new: true }
-    );
-    if (!updated) return res.status(404).json({ message: "Not found" });
-    res.json(updated);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error updating document" });
-  }
+  const { type, description, expiryDate } = req.body;
+  const updated = await Document.findOneAndUpdate(
+    { _id: req.params.id, clientId: req.userId },
+    { type, description, expiryDate },
+    { new: true }
+  );
+  if (!updated) return res.status(404).json({ message: "Document not found" });
+  res.json(updated);
 });
 
+// Delete document
 router.delete("/documents/:id", authenticate, async (req, res) => {
-  try {
-    const doc = await Document.findOneAndDelete({ _id: req.params.id, clientId: req.userId });
-    if (!doc) return res.status(404).json({ message: "Not found" });
+  const doc = await Document.findOneAndDelete({ _id: req.params.id, clientId: req.userId });
+  if (!doc) return res.status(404).json({ message: "Not found" });
 
-    fs.unlink(path.join(UPLOAD_DIR, path.basename(doc.fileUrl)), () => {});
-    res.json({ message: "Deleted successfully" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error deleting document" });
-  }
+  const filePath = path.join(UPLOAD_DIR, doc.fileName);
+  if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+
+  res.json({ message: "Deleted successfully" });
 });
 
 export default router;

@@ -4,6 +4,11 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 3000, // Change this to any port you prefer (e.g., 4000, 1234)
+    port: 3000,
   },
+  build: {
+    outDir: 'dist',
+  },
+  // Fix for SPA routing
+  base: '/',
 });

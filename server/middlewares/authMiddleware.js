@@ -1,5 +1,10 @@
 //Verifie token
 import jwt from "jsonwebtoken";
+import axios from "../axiosInstance";
+
+// axiosInstance.js
+
+
 
 const authMiddleware = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1]; // Format: "Bearer token"
